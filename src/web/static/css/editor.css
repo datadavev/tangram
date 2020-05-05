@@ -1,0 +1,13 @@
+html {
+  font-size: 1.0em;
+}
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+  font-family: "SF Mono","Segoe UI Mono","Roboto Mono",Menlo,Courier,monospace;
+}
+
+
+#validation {
+  min-height: 800px;
+}
