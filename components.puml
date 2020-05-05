@@ -1,0 +1,16 @@
+@startuml
+package "Tangram" {
+  [PySHACL ++] -left--> [tangram\ncommand line]
+  [PySHACL ++] --> [tangram_web]
+  [tangram_web] -right-- HTTP
+  [Docker\nTangram] -up.. [tangram_web]
+  [AWS Lambda\nTangram] -up.. [tangram_web]
+}
+package "Science On Schema.org" {
+  [Guidelines] ..> [SHACL] : informs
+  [Guidelines] -right.. [Examples]
+}
+[SHACL] ..> [PySHACL ++]
+[Browser\nTangram] -left--> HTTP : use
+[Gleaner] -left..> [HTTP] : use
+@enduml
