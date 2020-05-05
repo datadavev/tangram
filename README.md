@@ -57,8 +57,10 @@ python -m venv env
 pip install -e "git+git://github.com/RDFLib/rdflib.git#egg=rdflib"
 pip install -e "git+git://github.com/RDFLib/rdflib-jsonld.git#egg=rdflib_jsonld"
 pip install -r requirements-web.txt
-python tangram_web.py
-#Open http://localhost:8080 in a browser
+export FLASK_APP=tangram_web
+export FLASK_ENV=development
+flask run
+#Open http://localhost:5000 in a browser
 ```
 
 ### Docker build and run
@@ -150,3 +152,9 @@ Pushing resources to S3
 ```shell script
 aws s3 cp --recursive resources s3://sosov-${ACCOUNT_ID}/resources
 ```
+
+## Components
+
+@startuml
+
+@enduml

@@ -56,3 +56,7 @@ def validateSHACL(data_graph, shacl_graph=None, ont_graph=None, meta_shacl=False
         advanced=advanced,
     )
     return conforms, result_graph, result_text
+
+
+def generateReport(data_graph, shacl_graph, result_graph):
+    pass

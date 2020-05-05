@@ -7,7 +7,7 @@ import sys
 import logging
 import time
 import click
-import sosov.verify
+import sosov
 
 LOG_LEVELS = {
     "DEBUG": logging.DEBUG,
@@ -106,7 +106,15 @@ def download(dest_path, dest_name):
 @click.option(
     "--out-format", "-o", help="Output format", default="text", show_default=True,
 )
-def verify(data_file, data_format, shacl_file, schema_org, watch, out_format):
+@click.option(
+    "--advanced",
+    "-a",
+    help="Enable advanced SHACL features, requried for SPARQL",
+    default=False,
+    show_default=True,
+    is_flag=True,
+)
+def verify(data_file, data_format, shacl_file, schema_org, watch, out_format, advanced):
     """
     Verify a data shape against one or more shacl shapes.
     Args:
@@ -138,7 +146,7 @@ def verify(data_file, data_format, shacl_file, schema_org, watch, out_format):
         )
     else:
         L.info("Loading schema.org graph: %s", schema_org)
-        schema_graph = sosov.loadGraph(schema_org)
+        #schema_graph = sosov.loadGraph(schema_org)
     out_format = out_format.lower()
     more_work = True
     processed = False
@@ -172,7 +180,7 @@ def verify(data_file, data_format, shacl_file, schema_org, watch, out_format):
                 try:
                     L.info("Evaluating SHACL constraints...")
                     conforms, result_graph, result_text = sosov.verify.validateSHACL(
-                        data_graph, shacl_graph=shacl_graph, ont_graph=schema_graph
+                        data_graph, shacl_graph=shacl_graph, ont_graph=schema_graph, advanced=advanced
                     )
                     if out_format == "text":
                         print("====")

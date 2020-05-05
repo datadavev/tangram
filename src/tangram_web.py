@@ -47,6 +47,8 @@ OUTPUT_FORMATS = {
     "turtle": "text/turtle",
     "nt": "text/plain",
     "n3": "text/n3",
+    "nquads": "application/n-quads",
+    "pretty-xml": "application/rdf+xml"
 }
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -61,7 +63,7 @@ def getSchemaOrgTurtlePath():
             bucket = os.environ.get("resources_bucket", "sosov-data")
             s3_client.download_file(bucket, "resources/data/schema.org.ttl", fn_schema)
         return fn_schema
-    return os.abspath("resources/data/schema.org.ttl")
+    return os.path.abspath("resources/data/schema.org.ttl")
 
 
 def response422(msg):
@@ -83,6 +85,17 @@ class VerifyView(MethodView):
         ont_graph = None
         advanced = False
         meta_shacl = False
+        if needs_schemaorg:
+            # Load the schema.org graph
+            try:
+                ont_graph = rdflib.ConjunctiveGraph()
+                ont_graph.parse(getSchemaOrgTurtlePath(), format="turtle")
+            except Exception as e:
+                app.logger.error(
+                    "Failed to load schema.org RDF for inference. Continuing with no inference. error: %s",
+                    e,
+                )
+                ont_graph = None
         conforms, v_graph, v_text = sosov.verify.validateSHACL(
             data_graph,
             shacl_graph=shacl_graph,
@@ -93,14 +106,18 @@ class VerifyView(MethodView):
         if out_format == "human":
             return flask.Response(v_text, mimetype="text/plain")
         else:
-            skolemized = v_graph.skolemize(
-                authority="http://ld.geoschemas.org", basepath="/"
-            )
-            skolemized.namespace_manager = v_graph.namespace_manager
-            return flask.Response(
-                skolemized.serialize(format=out_format),
-                mimetype=OUTPUT_FORMATS[out_format],
-            )
+            try:
+                skolemized = v_graph.skolemize(
+                    authority="http://science-on-schema.org/", basepath="report/"
+                )
+                skolemized.namespace_manager = v_graph.namespace_manager
+                return flask.Response(
+                    skolemized.serialize(format=out_format),
+                    mimetype=OUTPUT_FORMATS.get(out_format, "text/plain"),
+                )
+            except Exception as e:
+                app.logger.error(e)
+                return flask.Response(str(e), mimetype="text/plain")
 
     def get(self):
         """
@@ -134,6 +151,11 @@ class VerifyView(MethodView):
             type: "string"
             enum: ['human', 'json-ld', 'turtle', 'nt', 'n3']
             default: human
+          - name: "infer"
+            in: "query"
+            required: false
+            default: false
+            type: "boolean"
         produces:
           - text/plain
           - text/turtle
@@ -180,7 +202,12 @@ class VerifyView(MethodView):
             return response422("SHACL shape graph URL is required.")
         except Exception as e:
             return response422(str(e))
-        return self.doVerification(data_graph, shacl_graph, out_format)
+        return self.doVerification(
+            data_graph,
+            shacl_graph,
+            out_format,
+            needs_schemaorg=flask.request.args.get("infer", False),
+        )
 
     def post(self):
         """
@@ -213,6 +240,11 @@ class VerifyView(MethodView):
             type: "string"
             enum: ['human', 'json-ld', 'turtle', 'nt', 'n3']
             default: human
+          - name: "infer"
+            in: "formData"
+            required: false
+            default: false
+            type: "boolean"
         responses:
           422:
             description: Missing or invalid input data
@@ -241,7 +273,13 @@ class VerifyView(MethodView):
             return response422("SHACL shape graph file is required.")
         except Exception as e:
             return response422(str(e))
-        return self.doVerification(data_graph, shacl_graph, out_format)
+        return self.doVerification(
+            data_graph,
+            shacl_graph,
+            out_format,
+            #needs_schemaorg=flask.request.form.get("infer", False),
+            needs_schemaorg=False,
+        )
 
 
 app.add_url_rule("/verify", view_func=VerifyView.as_view("verify"))
@@ -263,6 +301,7 @@ def getHtmlFromUrl():
         required: true
         type: string
         description: "URL of page to extract JSON-LD from"
+        default: "https://doi.pangaea.de/10.1594/PANGAEA.909101"
     responses:
       422:
         description: "Something went wrong retrieving content from the URL"
@@ -298,6 +337,14 @@ def getSchemaOrg():
     return flask.Response(
         open(so_turtle, "rb").read(), mimetype=OUTPUT_FORMATS["turtle"]
     )
+
+@app.route("/edit")
+def editSchemaOrg():
+    """
+
+    :return:
+    """
+    return flask.render_template('editor.html')
 
 
 @app.route("/")
