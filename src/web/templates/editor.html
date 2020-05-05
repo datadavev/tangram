@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JSON-LD Dataset Validator</title>
+  <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+  <link rel="stylesheet" href="codemirror-5.53.2/lib/codemirror.css">
+  <link rel="stylesheet" href="codemirror-5.53.2/theme/idea.css">
+  <link rel="stylesheet" href="css/editor.css">
+  <link rel="stylesheet" href="codemirror-5.53.2/addon/lint/lint.css">
+  <link rel="stylesheet" href="codemirror-5.53.2/addon/fold/foldgutter.css">
+  <script src="codemirror-5.53.2/lib/codemirror.js"></script>
+  <script src="codemirror-5.53.2/addon/display/autorefresh.js"></script>
+  <script src="codemirror-5.53.2/addon/fold/foldcode.js"></script>
+  <script src="codemirror-5.53.2/addon/fold/foldgutter.js"></script>
+  <script src="codemirror-5.53.2/addon/fold/brace-fold.js"></script>
+  <script src="codemirror-5.53.2/addon/fold/indent-fold.js"></script>
+  <script src="codemirror-5.53.2/mode/javascript/javascript.js"></script>
+  <script src="https://unpkg.com/jsonlint@1.6.3/web/jsonlint.js"></script>
+  <script src="codemirror-5.53.2/addon/lint/lint.js"></script>
+  <script src="codemirror-5.53.2/addon/lint/json-lint.js"></script>
+  <script src="codemirror-5.53.2/mode/turtle/turtle.js"></script>
+  <script type="module" src="editor.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="columns">
+    <div class="column col-6">
+      <div id="src_edit" class="panel">
+        <div class="panel-body">
+          <ul id="editor_tabs" class="tab tab-block" data-tabs="editors">
+            <li class="tab-item active"><a href="#">JSON-LD</a></li>
+            <li class="tab-item"><a href="#">SHACL</a></li>
+          </ul>
+          <ul data-tabs-content="editors">
+            <li><textarea id="jsonld_text"></textarea></li>
+            <li><textarea id="shape_text"></textarea></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="column col-6">
+      <div id="validation" class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="form-group">
+              <div class="columns">
+                <div class="column col-2">
+                  <select id="report_format" class="form-select">
+                    <option value="human">Human</option>
+                    <option value="turtle">Turtle</option>
+                    <option value="json-ld">JSON-LD</option>
+                    <option value="n3">N3</option>
+                    <option value="nt">NT</option>
+                    <option value="pretty-xml">RDF-XML</option>
+                  </select>
+                </div>
+                <div class="column col-1">
+                  <button id="bt_validate" class="btn input-group-btn" disabled="true">Validate</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <pre id="v_status"></pre>
+          <pre class="code" data-lang="Tangram Response">
+            <code id="validation_result"></code>
+          </pre>
+        </div>
+      </div>
+    </div>
+</div>
+
+</div>
+</body>
+</html>
