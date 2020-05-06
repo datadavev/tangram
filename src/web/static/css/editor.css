@@ -1,13 +1,39 @@
 html {
   font-size: 1.0em;
 }
+html,body {
+  height: 100vh;
+}
+
 .CodeMirror {
   border: 1px solid #eee;
-  height: auto;
   font-family: "SF Mono","Segoe UI Mono","Roboto Mono",Menlo,Courier,monospace;
+  height: 100%;
 }
+
+.page-height {
+  height: 100%;
+}
+
+.panel-header {
+}
+
+.editor-panel {
+  height: 95%;
+}
+
 
 
 #validation {
-  min-height: 800px;
 }
+
+
+#log-container { overflow: auto; }
+
+.log-warn { color: orange }
+.log-error { color: red }
+.log-info { color: black }
+.log-log { color: skyblue }
+.log-debug {color: silver }
+
+.log-warn, .log-error { font-weight: bold; }

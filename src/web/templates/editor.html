@@ -3,12 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>JSON-LD Dataset Validator</title>
-  <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+  <link rel="stylesheet" href="css/spectre.min.css">
   <link rel="stylesheet" href="codemirror-5.53.2/lib/codemirror.css">
   <link rel="stylesheet" href="codemirror-5.53.2/theme/idea.css">
-  <link rel="stylesheet" href="css/editor.css">
   <link rel="stylesheet" href="codemirror-5.53.2/addon/lint/lint.css">
   <link rel="stylesheet" href="codemirror-5.53.2/addon/fold/foldgutter.css">
+  <link rel="stylesheet" href="css/editor.css">
+  <script>
+    document._config = {
+      service_url: '{{base_path}}/verify',
+      report_format: 'human',
+      shape_graph_url: 'https://raw.githubusercontent.com/datadavev/science-on-schema.org/feature_59_SHACL/validation/shapegraphs/soso_common_v1.1.0.ttl',
+      shape_graph: '',
+      initial_data_graph_url: 'https://raw.githubusercontent.com/datadavev/science-on-schema.org/feature_59_SHACL/validation/testingDataGraphs/dataset-minmal-common.json-ld',
+      initial_data_graph: ''
+    };
+  </script>
   <script src="codemirror-5.53.2/lib/codemirror.js"></script>
   <script src="codemirror-5.53.2/addon/display/autorefresh.js"></script>
   <script src="codemirror-5.53.2/addon/fold/foldcode.js"></script>
@@ -16,61 +26,129 @@
   <script src="codemirror-5.53.2/addon/fold/brace-fold.js"></script>
   <script src="codemirror-5.53.2/addon/fold/indent-fold.js"></script>
   <script src="codemirror-5.53.2/mode/javascript/javascript.js"></script>
-  <script src="https://unpkg.com/jsonlint@1.6.3/web/jsonlint.js"></script>
+  <script src="lib/jsonlint.js"></script>
   <script src="codemirror-5.53.2/addon/lint/lint.js"></script>
   <script src="codemirror-5.53.2/addon/lint/json-lint.js"></script>
   <script src="codemirror-5.53.2/mode/turtle/turtle.js"></script>
   <script type="module" src="editor.js"></script>
 </head>
 <body>
-<div class="container">
-  <div class="columns">
-    <div class="column col-6">
-      <div id="src_edit" class="panel">
-        <div class="panel-body">
+<div class="container page-height">
+  <div class="columns page-height">
+    <div class="column col-6 page-height">
+      <div id="src_edit" class="panel page-height">
+        <div class="panel-header">
           <ul id="editor_tabs" class="tab tab-block" data-tabs="editors">
             <li class="tab-item active"><a href="#">JSON-LD</a></li>
             <li class="tab-item"><a href="#">SHACL</a></li>
           </ul>
-          <ul data-tabs-content="editors">
-            <li><textarea id="jsonld_text"></textarea></li>
-            <li><textarea id="shape_text"></textarea></li>
+        </div>
+        <div class="panel-body page-height">
+          <ul data-tabs-content="editors" class="editor-panel">
+            <li class="page-height">
+              <div class="form-horizontal">
+                <div class="form-group">
+                  <div class="col-2 col-sm-12">
+                    <label class="form-label" for="inp_data_source">Data source:</label>
+                  </div>
+                  <div class="col-9 col-sm-12">
+                    <input class="form-input" id="inp_data_source" list="data_source" name="data_source" autocomplete="true"/>
+                    <datalist id="data_source">
+                      <option
+                          value="https://raw.githubusercontent.com/datadavev/science-on-schema.org/feature_59_SHACL/validation/testingDataGraphs/dataset-minmal-common.json-ld">
+                        dataset-minmal-common.json-ld
+                      </option>
+                      <option
+                          value="https://raw.githubusercontent.com/datadavev/science-on-schema.org/feature_59_SHACL/validation/testingDataGraphs/dataset-full.json-ld">
+                        dataset-full.json-ld
+                      </option>
+                    </datalist>
+                  </div>
+                  <div class="col-1 col-sm-12">
+                    <button class="btn" id="btn_load_data">Load</button>
+                  </div>
+                </div>
+              </div>
+              <textarea id="jsonld_text"></textarea>
+            </li>
+            <li class="page-height">
+                <div class="form-horizontal">
+                <div class="form-group">
+                  <div class="col-2 col-sm-12">
+                    <label class="form-label" for="inp_shape_source">SHACL source:</label>
+                  </div>
+                  <div class="col-9 col-sm-12">
+                    <input class="form-input" id="inp_shape_source" list="shape_source" name="shape_source" autocomplete="true">
+                    <datalist id="shape_source">
+                      <option
+                          value="https://raw.githubusercontent.com/datadavev/science-on-schema.org/feature_59_SHACL/validation/shapegraphs/soso_common_v1.1.0.ttl">
+                        soso_common_v1.1.0.ttl
+                      </option>
+                    </datalist>
+                  </div>
+                  <div class="col-1 col-sm-12">
+                    <button class="btn" id="btn_load_shape">Load</button>
+                  </div>
+                </div>
+                </div>
+              <textarea id="shape_text"></textarea>
+            </li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="column col-6">
-      <div id="validation" class="panel">
+    <div class="column col-6 page-height">
+      <div id="reports" class="panel page-height">
         <div class="panel-header">
-          <div class="panel-title">
-            <div class="form-group">
-              <div class="columns">
-                <div class="column col-2">
-                  <select id="report_format" class="form-select">
-                    <option value="human">Human</option>
-                    <option value="turtle">Turtle</option>
-                    <option value="json-ld">JSON-LD</option>
-                    <option value="n3">N3</option>
-                    <option value="nt">NT</option>
-                    <option value="pretty-xml">RDF-XML</option>
-                  </select>
-                </div>
-                <div class="column col-1">
-                  <button id="bt_validate" class="btn input-group-btn" disabled="true">Validate</button>
+          <ul id="report_tabs" class="tab tab-block" data-tabs="reports">
+            <li class="tab-item active"><a href="#">Report</a></li>
+            <li class="tab-item"><a href="#">Log</a></li>
+            <li class="tab-item"><a href="#">Preferences</a></li>
+            <li class="tab-item"><a href="#">About</a></li>
+          </ul>
+        </div>
+        <div class="panel-body page-height">
+          <ul data-tabs-content="reports">
+            <li class="page-height">
+              <div class="form-group">
+                <div class="columns">
+                  <div class="column col-2">
+                    <select id="report_format" class="form-select">
+                      <option value="human">Human</option>
+                      <option value="turtle">Turtle</option>
+                      <option value="json-ld">JSON-LD</option>
+                      <option value="n3">N3</option>
+                      <option value="nt">NT</option>
+                      <option value="pretty-xml">RDF-XML</option>
+                    </select>
+                  </div>
+                  <div class="column col-1">
+                    <button id="bt_validate" class="btn input-group-btn" disabled="true">Validate</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <pre id="v_status"></pre>
-          <pre class="code" data-lang="Tangram Response">
-            <code id="validation_result"></code>
-          </pre>
+              <pre id="v_status"></pre>
+              <pre class="code" data-lang="Tangram Response">
+                <code id="validation_result"></code>
+              </pre>
+            </li>
+            <li class="page-height">
+              <div id="log-container" class="page-height">
+                <button id="clear_log" class="btn btn-sm">Clear log</button>
+                <pre id="log" class="page-height"></pre>
+              </div>
+            </li>
+            <li class="page-height">
+              <p>Preferences</p>
+            </li>
+            <li class="page-height">
+              <p>About this service</p>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
-</div>
+  </div>
 
 </div>
 </body>
