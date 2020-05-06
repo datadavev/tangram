@@ -83,7 +83,7 @@ class VerifyView(MethodView):
         self, data_graph, shacl_graph, out_format, needs_schemaorg=False
     ):
         ont_graph = None
-        advanced = False
+        advanced = True
         meta_shacl = False
         if needs_schemaorg:
             # Load the schema.org graph
@@ -96,7 +96,7 @@ class VerifyView(MethodView):
                     e,
                 )
                 ont_graph = None
-        conforms, v_graph, v_text = sosov.verify.validateSHACL(
+        conforms, v_graph, v_text, v_usage = sosov.verify.validateSHACL(
             data_graph,
             shacl_graph=shacl_graph,
             ont_graph=ont_graph,
@@ -104,9 +104,30 @@ class VerifyView(MethodView):
             advanced=advanced,
         )
         if out_format == "human":
+            v_text += f"{v_usage['total_shapes']}, {v_usage['shapes_applied']}, {v_usage['num_reports']}"
             return flask.Response(v_text, mimetype="text/plain")
         else:
             try:
+                soso = rdflib.Namespace("http://science-on-schema.org/1.1.0/validation/shacl#")
+                n_report = rdflib.URIRef('http://www.w3.org/ns/shacl#ValidationReport')
+                n = next(v_graph.subjects(rdflib.URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),n_report))
+
+                v_graph.bind('soso', soso)
+                v_graph.add((
+                    n,
+                    rdflib.URIRef('http://science-on-schema.org/1.1.0/validation/shacl#shapesApplied'),
+                    rdflib.Literal(v_usage['shapes_applied'])
+                ))
+                v_graph.add((
+                    n,
+                    rdflib.URIRef('http://science-on-schema.org/1.1.0/validation/shacl#shapeCount'),
+                    rdflib.Literal(v_usage['total_shapes'])
+                ))
+                v_graph.add((
+                    n,
+                    rdflib.URIRef('http://science-on-schema.org/1.1.0/validation/shacl#failureCount'),
+                    rdflib.Literal(v_usage['num_reports'])
+                ))
                 skolemized = v_graph.skolemize(
                     authority="http://science-on-schema.org/", basepath="report/"
                 )
@@ -344,7 +365,8 @@ def editSchemaOrg():
 
     :return:
     """
-    return flask.render_template('editor.html')
+    base_path = swagger_template['basePath']
+    return flask.render_template('editor.html', base_path=base_path)
 
 
 @app.route("/")
