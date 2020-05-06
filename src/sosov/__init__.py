@@ -8,7 +8,7 @@ import rdflib
 import logging
 from urllib.parse import urljoin
 
-__all__ = ["verify", ]
+__all__ = ["verify"]
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

@@ -1,6 +1,5 @@
 import pyshacl
 
-
 def listNodeShapes(g):
     """
     Return a list of the SHACL NodeShapes in g
@@ -45,7 +44,7 @@ def validateSHACL(data_graph, shacl_graph=None, ont_graph=None, meta_shacl=False
     inference = None
     if ont_graph is not None:
         inference = 'rdfs'
-    conforms, result_graph, result_text = pyshacl.validate(
+    conforms, result_graph, result_text, report_usage = pyshacl.validate(
         data_graph,
         shacl_graph=shacl_graph,
         ont_graph=ont_graph,
@@ -55,7 +54,7 @@ def validateSHACL(data_graph, shacl_graph=None, ont_graph=None, meta_shacl=False
         debug=False,
         advanced=advanced,
     )
-    return conforms, result_graph, result_text
+    return conforms, result_graph, result_text, report_usage
 
 
 def generateReport(data_graph, shacl_graph, result_graph):
