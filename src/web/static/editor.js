@@ -116,8 +116,13 @@ async function loadShapeGraph(url) {
 }
 
 async function loadTestSources() {
+  // Called at the start of an editor session
+  let c_data = data_editor.getDoc().getValue();
   const p1 = loadShapeGraph(_config.shape_graph_url);
-  const p2 = loadDataGraph(_config.initial_data_graph_url);
+  let p2 = function(){};
+  if (c_data.length < 2) {
+    p2 = loadDataGraph(_config.initial_data_graph_url);
+  }
   Promise.allSettled([p1, p2]).then(function() {
     console.info("Test sources loaded.")
   })
