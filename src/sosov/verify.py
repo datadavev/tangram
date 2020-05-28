@@ -44,7 +44,7 @@ def validateSHACL(data_graph, shacl_graph=None, ont_graph=None, meta_shacl=False
     inference = None
     if ont_graph is not None:
         inference = 'rdfs'
-    conforms, result_graph, result_text, report_usage = pyshacl.validate(
+    conforms, result_graph, result_text = pyshacl.validate(
         data_graph,
         shacl_graph=shacl_graph,
         ont_graph=ont_graph,
@@ -54,7 +54,7 @@ def validateSHACL(data_graph, shacl_graph=None, ont_graph=None, meta_shacl=False
         debug=False,
         advanced=advanced,
     )
-    return conforms, result_graph, result_text, report_usage
+    return conforms, result_graph, result_text
 
 
 def generateReport(data_graph, shacl_graph, result_graph):

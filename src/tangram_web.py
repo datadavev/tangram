@@ -96,7 +96,7 @@ class VerifyView(MethodView):
                     e,
                 )
                 ont_graph = None
-        conforms, v_graph, v_text, v_usage = sosov.verify.validateSHACL(
+        conforms, v_graph, v_text = sosov.verify.validateSHACL(
             data_graph,
             shacl_graph=shacl_graph,
             ont_graph=ont_graph,
@@ -104,36 +104,20 @@ class VerifyView(MethodView):
             advanced=advanced,
         )
         if out_format == "human":
-            v_text += f"{v_usage['total_shapes']}, {v_usage['shapes_applied']}, {v_usage['num_reports']}"
             return flask.Response(v_text, mimetype="text/plain")
         else:
             try:
-                soso = rdflib.Namespace("http://science-on-schema.org/1.1.0/validation/shacl#")
-                n_report = rdflib.URIRef('http://www.w3.org/ns/shacl#ValidationReport')
-                n = next(v_graph.subjects(rdflib.URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),n_report))
-
-                v_graph.bind('soso', soso)
-                v_graph.add((
-                    n,
-                    rdflib.URIRef('http://science-on-schema.org/1.1.0/validation/shacl#shapesApplied'),
-                    rdflib.Literal(v_usage['shapes_applied'])
-                ))
-                v_graph.add((
-                    n,
-                    rdflib.URIRef('http://science-on-schema.org/1.1.0/validation/shacl#shapeCount'),
-                    rdflib.Literal(v_usage['total_shapes'])
-                ))
-                v_graph.add((
-                    n,
-                    rdflib.URIRef('http://science-on-schema.org/1.1.0/validation/shacl#failureCount'),
-                    rdflib.Literal(v_usage['num_reports'])
-                ))
                 skolemized = v_graph.skolemize(
                     authority="http://science-on-schema.org/", basepath="report/"
                 )
                 skolemized.namespace_manager = v_graph.namespace_manager
+                context = None
+                if out_format == 'json-ld':
+                    context = {"sh": "http://www.w3.org/ns/shacl#","soso": "http://science-on-schema.org/1.1.0/validation/shacl#"}
+                    with open(os.path.join(app.static_folder, 'json/shacl_context.jsonld')) as fp_context:
+                        context = json.load(fp_context)
                 return flask.Response(
-                    skolemized.serialize(format=out_format),
+                    skolemized.serialize(format=out_format, context=context),
                     mimetype=OUTPUT_FORMATS.get(out_format, "text/plain"),
                 )
             except Exception as e:
@@ -359,14 +343,35 @@ def getSchemaOrg():
         open(so_turtle, "rb").read(), mimetype=OUTPUT_FORMATS["turtle"]
     )
 
-@app.route("/edit")
+@app.route("/edit", methods=['GET','POST'])
 def editSchemaOrg():
     """
 
     :return:
     """
+    json_data = None
+    json_data = '''{
+  "@context": {
+    "@vocab": "https://schema.org/"
+  },
+  "@type":"Dataset",
+  "@id":"./placeholder",
+  "name":"From app",
+  "description":"Minimal placeholder of a schema.org Dataset containing common properties",
+  "isAccessibleForFree":true,
+  "version":"0.0",
+  "keywords":[
+    "test", "Dataset"
+  ],
+  "url":"https://github.com/datadavev/tangram",
+  "identifier":"https://github.com/datadavev/tangram",
+  "sameAs":"."
+}'''
+    if flask.request.method == 'POST':
+        # Expect json-ld and/or shacl content
+        json_data = flask.request.files.get("dg",None)
     base_path = swagger_template['basePath']
-    return flask.render_template('editor.html', base_path=base_path)
+    return flask.render_template('editor.html', base_path=base_path, json_data=json_data)
 
 
 @app.route("/")
