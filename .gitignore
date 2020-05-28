@@ -1,3 +1,5 @@
+.DS_Store
+
 .idea
 lambda_env/
 src/zappa_settings.json
