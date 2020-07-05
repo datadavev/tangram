@@ -1,0 +1,17 @@
+{
+  "@context": {
+    "sh": "http://www.w3.org/ns/shacl#",
+    "SO":"http://schema.org/"
+  },
+  "@type":"sh:ValidationReport",
+  "sh:conforms":{},
+  "sh:failureCount":0,
+  "sh:shapeCount":0,
+  "sh:shapesApplied":0,
+  "sh:result":{
+    "@type":"sh:ValidationResult",
+    "sh:resultSeverity":{},
+    "sh:resultMessage":{"@value":{},"@language":"en"},
+    "sh:focusNode":{}
+  }
+}

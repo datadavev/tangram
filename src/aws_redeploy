@@ -1,0 +1,39 @@
+#!/bin/sh
+
+#Script to undeploy, then deploy, then update global config for tangram AWS
+#Assumes the folder structure:
+# .
+#├── config
+#│   └── tangram
+#└── tangram
+#    ├── docs
+#    ├── env
+#    ├── shapes
+#    └── src           [1]
+#
+# And this script is being run from [1]
+#
+
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." >/dev/null 2>&1 && pwd)"
+tmp=$(mktemp)
+CONFIG_FILE="${BASEDIR}/config/tangram/dev-config.json"
+
+#Add a single property value to the json structure
+set_property() {
+  #echo "${1} = ${2}"
+  jq --arg KEY "${1}" --arg VAL ${2} 'setpath($KEY | split("."); $VAL)' ${CONFIG_FILE} >${tmp} && mv ${tmp} ${CONFIG_FILE}
+}
+
+zappa undeploy
+zappa deploy
+ZSTATUS=$(zappa status -j)
+SERVICE_URL=$(jq -r '.["API Gateway URL"]' <<<"${ZSTATUS}")
+LAST_MODIFIED=$(jq -r '.["Lambda Last Modified"]' <<<"${ZSTATUS}")
+set_property "service.url" "${SERVICE_URL}"
+set_property "service.last_modified" "${LAST_MODIFIED}"
+
+cat ${CONFIG_FILE} | jq '.'
+cd ${BASEDIR}/config
+git commit -m "redeploy" ${CONFIG_FILE}
+git push
+cd ${BASEDIR}/tangram/src

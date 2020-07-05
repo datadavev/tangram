@@ -157,6 +157,37 @@ function loadDataFromForm() {
   })
 }
 
+function copyTextToClipboard(text) {
+  var textArea = document.createElement("textarea");
+  textArea.style.position = 'fixed';
+  textArea.style.top = 0;
+  textArea.style.left = 0;
+  textArea.style.width = '2em';
+  textArea.style.height = '2em';
+  textArea.style.padding = 0;
+  textArea.style.border = 'none';
+  textArea.style.outline = 'none';
+  textArea.style.boxShadow = 'none';
+  textArea.style.background = 'transparent';
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    Spectre.Toast.info("Report copied to clipboard.",null,{timeout:1500});
+  } catch(err) {
+    console.log("Unable to copy validation report to clipboard.")
+  }
+  document.body.removeChild(textArea);
+}
+
+// Copy the validation report to the clipboard
+function copyValidationReport() {
+  let source_element = document.getElementById('validation_result');
+  copyTextToClipboard(source_element.innerText);
+}
+
 // Override the codemirror code folding to start one level down, for the JSON-LD
 CodeMirror.commands.foldSub = function(cm) {
     cm.operation(function() {
@@ -164,7 +195,6 @@ CodeMirror.commands.foldSub = function(cm) {
         cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
     });
   };
-
 
 function clearLog() {
   document.getElementById("log").innerHTML = "";
@@ -267,5 +297,6 @@ window.onload = async function() {
   data_editor.on('change', onEditorChange);
   document.getElementById('btn_load_data').onclick = loadDataFromForm;
   document.getElementById('btn_load_shape').onclick = loadShapeFromForm;
+  document.getElementById('bt_copy_result').onclick = copyValidationReport;
 };
 

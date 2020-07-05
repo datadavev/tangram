@@ -8,6 +8,7 @@ import logging
 import time
 import click
 import sosov
+import pyshacl
 
 LOG_LEVELS = {
     "DEBUG": logging.DEBUG,
@@ -121,7 +122,7 @@ def verify(data_file, data_format, shacl_file, schema_org, watch, out_format, ad
         data_file: Path to data shape file
         data_format: format of datashape, see rdflib
         shacl_file: Path to shacl file in turtle
-        schema_org: Path to schema.org vocabulary in turtle
+        schema_org: Path to schema.org vocabulary in turtle, defaults to the shacl_file
         watch: (boolean) Watch data or shape file for changes and recompute
         out_format: format for output, "text" or rdflib format
 
@@ -146,7 +147,7 @@ def verify(data_file, data_format, shacl_file, schema_org, watch, out_format, ad
         )
     else:
         L.info("Loading schema.org graph: %s", schema_org)
-        #schema_graph = sosov.loadGraph(schema_org)
+        schema_graph = sosov.loadGraph(schema_org)
     out_format = out_format.lower()
     more_work = True
     processed = False
@@ -179,8 +180,11 @@ def verify(data_file, data_format, shacl_file, schema_org, watch, out_format, ad
             if not processed and data_graph is not None and shacl_graph is not None:
                 try:
                     L.info("Evaluating SHACL constraints...")
-                    conforms, result_graph, result_text = sosov.verify.validateSHACL(
-                        data_graph, shacl_graph=shacl_graph, ont_graph=schema_graph, advanced=advanced
+                    #conforms, result_graph, result_text = sosov.verify.validateSHACL(
+                    #    data_graph, shacl_graph=shacl_graph, ont_graph=schema_graph, advanced=advanced
+                    #)
+                    conforms, result_graph, result_text = pyshacl.validate(
+                        data_graph, shacl_graph=shacl_graph, ont_graph=schema_graph, advanced=advanced, inference='rdfs'
                     )
                     if out_format == "text":
                         print("====")

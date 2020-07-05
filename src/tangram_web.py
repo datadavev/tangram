@@ -369,7 +369,9 @@ def editSchemaOrg():
 }'''
     if flask.request.method == 'POST':
         # Expect json-ld and/or shacl content
-        json_data = flask.request.files.get("dg",None)
+        data = dict(flask.request.form)
+        json_data = data.get("dg",None)
+        #json_data = flask.request.files.get("dg",None)
     base_path = swagger_template['basePath']
     return flask.render_template('editor.html', base_path=base_path, json_data=json_data)
 
