@@ -2,10 +2,16 @@
 #-e git+git://github.com/RDFLib/rdflib.git@5.0.0#egg=rdflib
 #-e git+git://github.com/RDFLib/rdflib-jsonld.git#egg=rdflib_jsonld
 
+# This version of rdflib includes a fix for handling Link Headers.
+# It is forked from the 5.0.0 release
+-e git+git://github.com/datadavev/rdflib.git@issue_rdflib-jsonld_85#egg=rdflib
+
+-e git+git://github.com/RDFLib/rdflib-jsonld.git#egg=rdflib_jsonld
+
 # This version of extruct is patched for compatibility with rdflib 5.x
 -e git+git://github.com/datadavev/extruct.git#egg=extruct
 
 # This version of pySHACL includes additional graph metrics for reporting
-#-e git+git://github.com/datadavev/pySHACL.git#egg=pyshacl
+-e git+git://github.com/datadavev/pySHACL.git#egg=pyshacl
 
 requests

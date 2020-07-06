@@ -82,8 +82,8 @@
                     <input class="form-input" id="inp_shape_source" list="shape_source" name="shape_source" autocomplete="true">
                     <datalist id="shape_source">
                       <option
-                          value="https://raw.githubusercontent.com/datadavev/science-on-schema.org/feature_59_SHACL/validation/shapegraphs/soso_common_v1.1.0.ttl">
-                        soso_common_v1.1.0.ttl
+                          value="https://raw.githubusercontent.com/datadavev/science-on-schema.org/feature_59_SHACL/validation/shapegraphs/soso_common_v1.2.1.ttl">
+                        soso_common_v1.2.1.ttl
                       </option>
                     </datalist>
                   </div>
@@ -92,7 +92,7 @@
                   </div>
                 </div>
                 </div>
-              <textarea id="shape_text"></textarea>
+              <textarea id="shape_text">{% if shacl_data %}{{shacl_data}}{% endif %}</textarea>
             </li>
           </ul>
         </div>

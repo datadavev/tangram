@@ -350,6 +350,7 @@ def editSchemaOrg():
     :return:
     """
     json_data = None
+    shacl_data = None
     json_data = '''{
   "@context": {
     "@vocab": "https://schema.org/"
@@ -372,8 +373,11 @@ def editSchemaOrg():
         data = dict(flask.request.form)
         json_data = data.get("dg",None)
         #json_data = flask.request.files.get("dg",None)
+        shacl_data = data.get("sg", None)
+        #print("JSON: " + json_data)
+        #print("SHACL: " + shacl_data)
     base_path = swagger_template['basePath']
-    return flask.render_template('editor.html', base_path=base_path, json_data=json_data)
+    return flask.render_template('editor.html', base_path=base_path, json_data=json_data, shacl_data=shacl_data)
 
 
 @app.route("/")
